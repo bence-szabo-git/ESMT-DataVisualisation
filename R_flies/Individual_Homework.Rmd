@@ -1,0 +1,302 @@
+---
+title: "Individual Homework"
+author: "Your name goes here"
+date: "`r Sys.Date()`"
+output: 
+    html_document:
+      number_sections: true
+      highlight: zenburn
+      theme: flatly
+      toc: yes
+      toc_depth: 2
+      toc_float:
+        collapsed: false
+      fontsize: 10pt
+---
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+# Grading visualisations
+
+Using the Data Visualisation checklist (under session1 files), please
+‘grade’ Figure 3 of the [JPMorgan Chase Institute on Year-over-year
+percent change in credit card spending by essential category](https://www.jpmorganchase.com/institute/all-topics/financial-health-wealth-creation/initial-household-spending-response-to-covid-19-evidence-from-credit-card-transactions).
+If you wanted the actual paper on which this publication was based, you
+can [find it
+here](https://bfi.uchicago.edu/wp-content/uploads/BFI_WP_202082.pdf).
+
+## Guideline
+
+| Dimension | Score | Comments |
+|-----------|-------|----------|
+| G1        |       |          |
+| G2        |       |          |
+| G3        |       |          |
+| G4        |       |          |
+| G5        |       |          |
+| G6        |       |          |
+| **TOTAL** |       |          |
+
+## Arrangement
+
+| Dimension | Score | Comments |
+|-----------|-------|----------|
+| A1        |       |          |
+| A2        |       |          |
+| A3        |       |          |
+| A4        |       |          |
+| A5        |       |          |
+| **TOTAL** |       |          |
+
+## Colour
+
+| Dimension | Score | Comments |
+|-----------|-------|----------|
+| C1        |       |          |
+| C2        |       |          |
+| C3        |       |          |
+| C4        |       |          |
+| C5        |       |          |
+| **TOTAL** |       |          |
+
+## Lines
+
+| Dimension | Score | Comments |
+|-----------|-------|----------|
+| L1        |       |          |
+| L2        |       |          |
+| L3        |       |          |
+| L4        |       |          |
+| **TOTAL** |       |          |
+
+## Overall
+
+| Dimension | Score | Comments |
+|-----------|-------|----------|
+| O1        |       |          |
+| O2        |       |          |
+| O3        |       |          |
+| O4        |       |          |
+| **TOTAL** |       |          |
+
+# Prepare the worst possible visualisation
+
+```{r load_libraries}
+# Load the gapminder package
+library(gapminder)
+# Load the tidyverse package
+library(tidyverse)
+# Load the skimr package
+library(skimr)
+```
+
+```{r bad_visualisation}
+
+
+```
+
+# Rents in San Francsisco Bay Area 2000-2018
+
+[Kate Pennington](https://www.katepennington.org/data) created a panel
+of historic Craigslist rents by scraping posts archived by the Wayback
+Machine. You can read more about her work here
+
+[What impact does new housing have on rents, displacement, and
+gentrification in the surrounding neighborhood? Read our interview with
+economist Kate Pennington about her article, "Does Building New Housing
+Cause Displacement?:The Supply and Demand Effects of Construction in San
+Francisco."](https://matrix.berkeley.edu/research-article/kate-pennington-on-gentrification-and-displacement-in-san-francisco/)
+
+In our case, we have a clean(ish) dataset with about 200K rows that
+correspond to Craigslist listings for renting properties in the greater
+SF area. The data dictionary is as follows
+
+| variable    | class     | description           |
+|-------------|-----------|-----------------------|
+| post_id     | character | Unique ID             |
+| date        | double    | date                  |
+| year        | double    | year                  |
+| nhood       | character | neighborhood          |
+| city        | character | city                  |
+| county      | character | county                |
+| price       | double    | price in USD          |
+| beds        | double    | n of beds             |
+| baths       | double    | n of baths            |
+| sqft        | double    | square feet of rental |
+| room_in_apt | double    | room in apartment     |
+| address     | character | address               |
+| lat         | double    | latitude              |
+| lon         | double    | longitude             |
+| title       | character | title of listing      |
+| descr       | character | description           |
+| details     | character | additional details    |
+
+The dataset was used in a recent
+[tidyTuesday](https://github.com/rfordatascience/tidytuesday) project.
+
+```{r}
+# download directly off tidytuesdaygithub repo
+
+rent <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-07-05/rent.csv')
+
+```
+
+What are the variable types? Do they all correspond to what they really
+are? Which variables have most missing values?
+
+```{r skim_data}
+# YOUR CODE GOES HERE
+skimr::skim(rent)
+
+```
+
+Make a plot that shows the top 20 cities in terms of % of classifieds
+between 2000-2018. You need to calculate the number of listings by city,
+and then convert that number to a %.
+
+The final graph should look like this 
+
+
+```{r top_cities, echo=FALSE, out.width="90%"}
+knitr::include_graphics(here::here("images", "top_cities.png"), error = FALSE)
+```
+
+
+```{r top_cities2}
+# YOUR CODE GOES HERE
+
+
+```
+
+Make a plot that shows the evolution of median prices in San Francisco
+for 0, 1, 2, and 3 bedrooms listings. The final graph should look like
+this
+
+
+
+```{r sf_rentals, echo=FALSE, out.width="90%"}
+knitr::include_graphics(here::here("images", "sf_rentals.png"), error = FALSE)
+```
+
+```{r sf_median_prices}
+
+# YOUR CODE GOES HERE
+
+
+```
+
+Finally, make a plot that shows median rental prices for the top 12
+cities in the Bay area. Your final graph should look like this
+
+
+```{r one_bed_bay_area, echo=FALSE, out.width="90%"}
+knitr::include_graphics(here::here("images", "one_bed_bay_area.png"), error = FALSE)
+```
+
+
+
+```{r spirit_plot}
+# YOUR CODE GOES HERE
+
+```
+
+What can you infer from these plots? Don't just explain what's in the
+graph, but speculate or tell a short story (1-2 paragraphs max).
+
+# Hollywood Age Gap
+
+The website <https://hollywoodagegap.com> is a record of *THE AGE
+DIFFERENCE IN YEARS BETWEEN MOVIE LOVE INTERESTS*. This is an
+informational site showing the age gap between movie love interests and
+the data follows certain rules:
+
+-   The two (or more) actors play actual love interests (not just
+    friends, coworkers, or some other non-romantic type of relationship)
+-   The youngest of the two actors is at least 17 years old
+-   No animated characters
+
+The age gaps dataset includes "gender" columns, which always contain the
+values "man" or "woman". These values appear to indicate how the
+characters in each film identify and some of these values do not match
+how the actor identifies. We apologize if any characters are misgendered
+in the data!
+
+The following is a data dictionary of the variables used
+
+| variable           | class     | description                                                                                             |
+|:-----------------|:-----------------|:-----------------------------------|
+| movie_name         | character | Name of the film                                                                                        |
+| release_year       | integer   | Release year                                                                                            |
+| director           | character | Director of the film                                                                                    |
+| age_difference     | integer   | Age difference between the characters in whole years                                                    |
+| couple_number      | integer   | An identifier for the couple in case multiple couples are listed for this film                          |
+| actor_1_name       | character | The name of the older actor in this couple                                                              |
+| actor_2_name       | character | The name of the younger actor in this couple                                                            |
+| character_1_gender | character | The gender of the older character, as identified by the person who submitted the data for this couple   |
+| character_2_gender | character | The gender of the younger character, as identified by the person who submitted the data for this couple |
+| actor_1_birthdate  | date      | The birthdate of the older member of the couple                                                         |
+| actor_2_birthdate  | date      | The birthdate of the younger member of the couple                                                       |
+| actor_1_age        | integer   | The age of the older actor when the film was released                                                   |
+| actor_2_age        | integer   | The age of the younger actor when the film was released                                                 |
+
+```{r}
+
+age_gaps <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-02-14/age_gaps.csv')
+
+
+```
+
+How would you explore this data set? Here are some ideas of tables/
+graphs to help you with your analysis
+
+-   How is `age_difference` distributed? What's the 'typical'
+    `age_difference` in movies?
+
+-   The `half plus seven\` rule. Large age disparities in relationships
+    carry certain stigmas. One popular rule of thumb is the
+    [half-your-age-plus-seven](https://en.wikipedia.org/wiki/Age_disparity_in_sexual_relationships#The_.22half-your-age-plus-seven.22_rule)
+    rule. This rule states you should never date anyone under half your
+    age plus seven, establishing a minimum boundary on whom one can
+    date. In order for a dating relationship to be acceptable under this
+    rule, your partner's age must be:
+
+$$\frac{\text{Your age}}{2} + 7 < \text{Partner Age} < (\text{Your age} - 7) * 2$$
+How frequently does this rule apply in this dataset?
+
+-   Which movie has the greatest number of love interests?
+-   Which actors/ actresses have the greatest number of love interests
+    in this dataset?
+-   Is the mean/median age difference staying constant over the years
+    (1935 - 2022)?
+-   How frequently does Hollywood depict same-gender love interests?
+
+# Challenge 1: Replicating a chart
+
+The purpose of this exercise is to reproduce a plot using your `dplyr`
+and `ggplot2` skills. It builds on exercise 1, the San Francisco rentals
+data.
+
+You have to create a graph that calculates the cumulative % change in
+median rental prices for 0-, 1-, and 2-bed flats between 2000 and 2018
+for the top twelve cities in Bay Area, by number of ads that appeared in
+Craigslist. Your final graph should look like below. You may find
+`dplyr::first()` a useful function
+
+```{r challenge1, echo=FALSE, out.width="90%"}
+knitr::include_graphics(here::here("images", "challenge1.png"), error = FALSE)
+```
+Deliverable - a knitted HTML, displaying code and output.
