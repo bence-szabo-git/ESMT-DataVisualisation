@@ -43,69 +43,89 @@ here](https://bfi.uchicago.edu/wp-content/uploads/BFI_WP_202082.pdf).
 
 | Dimension | Score | Comments |
 |-----------|-------|----------|
-| G1        |       |          |
-| G2        |       |          |
-| G3        |       |          |
-| G4        |       |          |
-| G5        |       |          |
-| G6        |       |          |
-| **TOTAL** |       |          |
+| G1        |    1   |    descriptive title but misalligned      |
+| G2        |   2    |  well done, clear        |
+| G3        |   2    |  titles are bigger, notes are the smallest        |
+| G4        |   2    |  only horizontal        |
+| G5        |   1    |  only the axes are labeled directly but even they are hard to differentiate from one another, understanding is hard        |
+| G6        |   2    |  labels are ok, but I suggest using only 3 letters of each month to make it more comprehensive        |
+| **TOTAL** |   10    |   Generally, the text is ok      |
 
 ## Arrangement
 
 | Dimension | Score | Comments |
 |-----------|-------|----------|
-| A1        |       |          |
-| A2        |       |          |
-| A3        |       |          |
-| A4        |       |          |
-| A5        |       |          |
-| **TOTAL** |       |          |
+| A1        |   2   |  accurate        |
+| A2        |   2   |  ordered correctly        |
+| A3        |   2   |  distance is equal        |
+| A4        |   2   |  two dimensions        |
+| A5        |   2   |  no decoration        |
+| **TOTAL** |   10    | followed the principles         |
 
 ## Colour
 
 | Dimension | Score | Comments |
 |-----------|-------|----------|
-| C1        |       |          |
-| C2        |       |          |
-| C3        |       |          |
-| C4        |       |          |
-| C5        |       |          |
-| **TOTAL** |       |          |
+| C1        |   n/a    |  not concerning        |
+| C2        |   0    |  groceries should be highlighted        |
+| C3        |   0    |  print then dump        |
+| C4        |   0    |  colorblind combinations        |
+| C5        |   2    |  good contrast        |
+| **TOTAL** |   2    |  few good shots was available in this case, none  really taken        |
 
 ## Lines
 
 | Dimension | Score | Comments |
 |-----------|-------|----------|
-| L1        |       |          |
-| L2        |       |          |
-| L3        |       |          |
-| L4        |       |          |
-| **TOTAL** |       |          |
+| L1        |   2    |  gridlines are useful, quiet        |
+| L2        |   2    |  good embedding        |
+| L3        |   2    |  even though marks are present, they seems necessary        |
+| L4        |   2    | simple axes         |
+| **TOTAL** |   8    |  well done with the lines         |
 
 ## Overall
 
 | Dimension | Score | Comments |
 |-----------|-------|----------|
-| O1        |       |          |
-| O2        |       |          |
-| O3        |       |          |
-| O4        |       |          |
-| **TOTAL** |       |          |
+| O1        |   1    |  not really highlighting        |
+| O2        |   2    |  appropriate chart type         |
+| O3        |   2    |  precise and simple       |
+| O4        |   1    |  mostly yes, but nothing highlights the "groceries" part        |
+| **TOTAL** |   6    |  Generally impressive but a make-up could help it        |
 
 # Prepare the worst possible visualisation
 
 ```{r load_libraries}
 # Load the gapminder package
-library(gapminder)
-# Load the tidyverse package
-library(tidyverse)
 # Load the skimr package
+# scales package to help with axis formatting
+# Load the tidyverse package
+library(gapminder)
+library(tidyverse)
 library(skimr)
+library(scales)
+library(RColorBrewer) 
 ```
 
 ```{r bad_visualisation}
-
+# barchart plot gapminder, x axis is year, y axis is lifeExp, second y axis is population, color by continent, all text same size
+ggplot(gapminder, aes(x = year, y = lifeExp, fill = continent)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_line(aes(y = pop / 1000000, group = continent), color = "black", size = 1) +
+  scale_y_continuous(
+    name = "Life Expectancy",
+    sec.axis = sec_axis(~ . * 1000000, name = "Population")
+  ) +
+  labs(title = "Life Expectancy and Population Over Time by Continent",
+       x = "Year",
+       fill = "Continent") +
+  theme_dark() +
+  theme(
+    text = element_text(size = 20),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major = element_line(color = "grey", size = 0.5),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0.25)
+  )
 
 ```
 
@@ -158,9 +178,19 @@ rent <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidyt
 What are the variable types? Do they all correspond to what they really
 are? Which variables have most missing values?
 
+Based on the tables, the location variables have the most missing values (longitude, latitude => addresses), but similarly does the description and details variable. Furthermore, a lot of records missing bathroom numbers, space in squarefeet and a few misses beds number as well.
+
+The variable types seem to be correct, except for the date variable, which should be a date type instead of double. Year, beds, baths, room_in_apt are double instead of int and descr and details are characters (which could be string maybe).
+
 ```{r skim_data}
 # YOUR CODE GOES HERE
 skimr::skim(rent)
+#check types
+
+
+
+glimpse(rent)
+
 
 ```
 
@@ -173,11 +203,41 @@ The final graph should look like this
 
 ```{r top_cities, echo=FALSE, out.width="90%"}
 knitr::include_graphics(here::here("images", "top_cities.png"), error = FALSE)
+
 ```
 
 
 ```{r top_cities2}
-# YOUR CODE GOES HERE
+
+listings <- rent %>%
+  group_by(city) %>%
+  summarise(count = n()) %>%
+  ungroup() %>%
+  mutate(percentage = count / sum(count) * 100) %>%
+  arrange(desc(percentage)) %>%
+  slice_head(n = 20)
+
+ggplot(listings, aes(
+    x = reorder(city, percentage),
+    y = percentage
+  )) +
+  geom_col(fill = "darkgrey") +
+#  geom_text(
+#    aes(label = sprintf("%.1f%%", percentage)),
+#    hjust = -0.1,
+#    size = 3
+#  ) +
+  coord_flip() +
+  scale_y_continuous(
+        labels = label_number(suffix = " %")
+        # alternative: label_percent(), but already multiplied by 100 above
+    ) +
+  theme_minimal() +
+  labs(
+    title = "Top 20 cities by % of classifieds (2000-2018)",
+    x = "City", # y-axis after flip
+    y = "% of classifieds" # x-axis after flip
+  )
 
 
 ```
@@ -194,8 +254,45 @@ knitr::include_graphics(here::here("images", "sf_rentals.png"), error = FALSE)
 
 ```{r sf_median_prices}
 
-# YOUR CODE GOES HERE
+sf_median_rent_sanFrancisco <- rent %>%
+  filter(city == "san francisco") %>%
+  mutate(beds = factor(beds)) %>%
+  filter(beds %in% c("0", "1", "2", "3")) %>%
+  
+  group_by(year, beds) %>% 
+  summarise(
+    median_price = median(price, na.rm = TRUE),
+    .groups = 'drop'
+  )
 
+ggplot(sf_median_rent_sanFrancisco, aes(
+    x = year, 
+    y = median_price, 
+    group = beds,
+    color = beds 
+  )) +
+  
+  geom_line(linewidth = 0.8) +
+#  geom_point(size = 1.5) +
+  scale_color_brewer(palette = "Set1") + 
+  
+  facet_wrap(~ beds, ncol = 4) + 
+  
+  theme_minimal() +
+  labs(
+    title = "Median Rental Price Over Time in San Francisco",
+    subtitle = "Separated by Number of Bedrooms (0 to 3)",
+    x = "Year",
+    y = ""
+  ) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    strip.text = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.border = element_rect(color = "gray30", fill = NA, linewidth = 1),
+    strip.background = element_rect(fill = "gray90", color = "gray30", linewidth = 1),
+    legend.position = "none"
+  )
 
 ```
 
@@ -210,12 +307,60 @@ knitr::include_graphics(here::here("images", "one_bed_bay_area.png"), error = FA
 
 
 ```{r spirit_plot}
-# YOUR CODE GOES HERE
+
+top_12_cities <- rent %>%
+  count(city, sort = TRUE) %>%
+  slice_head(n = 12) %>%
+  pull(city) # Extract the vector of top 12 city names
+
+sf_median_rent <- rent %>%
+  filter(beds == 1) %>%
+  filter(city %in% top_12_cities) %>%
+  
+  group_by(year, city) %>% 
+  summarise(
+    median_price = median(price, na.rm = TRUE),
+    .groups = 'drop'
+  )
+  
+ggplot(sf_median_rent, aes(
+    x = year, 
+    y = median_price, 
+    group = city,
+    color = city 
+  )) +
+  
+  geom_line(linewidth = 0.8) +
+#  geom_point(size = 1.5) +
+  scale_color_brewer(palette = "Set3") + 
+  
+  facet_wrap(~ city) + 
+  
+  theme_minimal() +
+  labs(
+    title = "Median Rental Price Over Time in Bay Area for 1 bedroom flat",
+    subtitle = "Separated by Cities",
+    x = "Year",
+    y = ""
+  ) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    strip.text = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.border = element_rect(color = "gray30", fill = NA, linewidth = 1),
+    strip.background = element_rect(fill = "gray90", color = "gray30", linewidth = 1),
+    legend.position = "none"
+  )
+
 
 ```
 
 What can you infer from these plots? Don't just explain what's in the
 graph, but speculate or tell a short story (1-2 paragraphs max).
+
+First of all, San Francisco has the most listings, that's clear, no dangerous rivals. Next to that, it is easy to observe that in a certain amount (0-3), the more rooms you have, the bigger increase can be measured over the year on the price. Also, there are some expensive cities - few can be compared to San Francisco.
+
+Does this mean San Francisco has a bright future? Regarding the real estate sector, probably yes. However, this means strong separation between social classes, mainly caused only by the price. The average rental price for only one bedroom flat is around 3k USD, which is a lot. This means that only wealthy people can afford to live there, and the rest will be pushed out to the suburbs or other cities. This leads not only to different communities in that area, but it will change the local businesses as well. Only a few McDonald's will be operating in a city that can not provide the necessary workers for it. Interesting, how one factor can change the whole social structure of a city.
 
 # Hollywood Age Gap
 
@@ -256,8 +401,9 @@ The following is a data dictionary of the variables used
 ```{r}
 
 age_gaps <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-02-14/age_gaps.csv')
-
-
+skimr::skim(age_gaps)
+glimpse(age_gaps)
+head(age_gaps)
 ```
 
 How would you explore this data set? Here are some ideas of tables/
@@ -265,6 +411,19 @@ graphs to help you with your analysis
 
 -   How is `age_difference` distributed? What's the 'typical'
     `age_difference` in movies?
+```{r}
+ggplot(age_gaps, aes(x = age_difference)) +
+  geom_histogram(binwidth = 2, fill = "darkgrey", color = "black") +
+  theme_minimal() +
+  labs(
+    title = "Distribution of Age Differences in Movie Love Interests",
+    x = "Age Difference (years)",
+    y = "Count"
+  )
+```
+Seems like the distribution is right-skewed, peaking at 2-3 years of difference between the actors. There are a lot of movies with romantic relationships with over 10 years of age gap.
+
+
 
 -   The `half plus seven\` rule. Large age disparities in relationships
     carry certain stigmas. One popular rule of thumb is the
@@ -276,13 +435,159 @@ graphs to help you with your analysis
 
 $$\frac{\text{Your age}}{2} + 7 < \text{Partner Age} < (\text{Your age} - 7) * 2$$
 How frequently does this rule apply in this dataset?
+```{r}
+age_gaps <- age_gaps %>%
+  mutate(
+    half_plus_seven_lower = (actor_1_age / 2) + 7,
+    half_plus_seven_upper = (actor_1_age - 7) * 2,
+    follows_half_plus_seven = actor_2_age >= half_plus_seven_lower & actor_2_age <= half_plus_seven_upper
+  )
+
+ggplot(age_gaps, aes(x = follows_half_plus_seven)) +
+  geom_bar(fill = "darkgrey", color = "black") +
+  theme_minimal() +
+  labs(
+    title = "Frequency of Movies Following the Half-Your-Age-Plus-Seven Rule",
+    x = "Follows Half-Your-Age-Plus-Seven Rule",
+    y = "Count"
+  )
+
+```
 
 -   Which movie has the greatest number of love interests?
+```{r}
+top_movies <- age_gaps %>%
+  group_by(movie_name) %>%
+  summarise(love_interest_count = n()) %>%
+  arrange(desc(love_interest_count)) %>%
+  slice_head(n = 10)
+ggplot(top_movies, aes(x = reorder(movie_name, love_interest_count), y = love_interest_count)) +
+  geom_col(fill = "darkgrey") +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    title = "Top 10 Movies by Number of Love Interests",
+    x = "Movie Name",
+    y = "Number of Love Interests"
+  )
+
+```
+
 -   Which actors/ actresses have the greatest number of love interests
     in this dataset?
+```{r}
+top_actors <- age_gaps %>%
+  pivot_longer(cols = c(actor_1_name, actor_2_name), names_to = "actor_role", values_to = "actor_name") %>%
+  group_by(actor_name) %>%
+  summarise(love_interest_count = n()) %>%
+  arrange(desc(love_interest_count)) %>%
+  slice_head(n = 10)
+
+ggplot(top_actors, aes(x = reorder(actor_name, love_interest_count), y = love_interest_count)) +
+  geom_col(fill = "darkgrey") +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    title = "Top 10 Actors/Actresses by Number of Love Interests",
+    x = "Actor/Actress Name",
+    y = "Number of Love Interests"
+  )
+
+```
+    
 -   Is the mean/median age difference staying constant over the years
     (1935 - 2022)?
+```{r}
+age_trends <- age_gaps %>%
+  group_by(release_year) %>%
+  summarise(
+    mean_age_difference = mean(age_difference, na.rm = TRUE),
+    median_age_difference = median(age_difference, na.rm = TRUE)
+)
+
+age_trends_long <- age_trends %>%
+  pivot_longer(
+    cols = c(mean_age_difference, median_age_difference),
+    names_to = "statistic_type",
+    values_to = "age_difference"
+  )
+
+ggplot(age_trends_long, aes(x = release_year, y = age_difference, fill = statistic_type)) +
+  geom_area(alpha = 0.6, position = "identity") + 
+  geom_line(aes(color = statistic_type), linewidth = 0.9) + 
+  
+  theme_minimal() +
+  labs(
+    title = "Trends in Mean and Median Age Differences Over the Years",
+    x = "Release Year",
+    y = "Age Difference (years)",
+    fill = "Statistic"
+  ) +
+  
+  scale_fill_manual(
+    values = c(
+      "mean_age_difference" = "#85A3C7", # Softer blue
+      "median_age_difference" = "#E89B9B" # Softer red/rose
+    ),
+    labels = c("Mean Age Difference", "Median Age Difference")
+  ) +
+  scale_color_manual( # Use slightly darker versions for the lines to stand out
+    values = c(
+      "mean_age_difference" = "#4A709E", # Darker shade of the blue
+      "median_age_difference" = "#C76F6F" # Darker shade of the red/rose
+    ),
+    labels = c("Mean Age Difference", "Median Age Difference")
+  ) +
+  
+  theme(
+    legend.title = element_blank(),
+    legend.position = "top",
+    plot.title = element_text(face = "bold", size = 16),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10)
+  )
+```
+   No, it is reduced strongly over the years with only a few outliars
+   
+   
 -   How frequently does Hollywood depict same-gender love interests?
+```{r}
+
+same_gender_trends <- age_gaps %>%
+  mutate(is_same_gender = (character_1_gender == character_2_gender)) %>%
+  filter(release_year >= 1995) %>%
+  
+  group_by(release_year) %>%
+  
+  summarise(
+    same_gender_count = sum(is_same_gender, na.rm = TRUE),
+    total_couples = n(),
+    .groups = 'drop' 
+    ) %>%
+  
+  mutate(
+    same_gender_frequency = same_gender_count / total_couples
+  )
+
+ggplot(same_gender_trends, aes(x = release_year, y = same_gender_frequency)) +
+  geom_col(fill = "#4A709E") +
+  
+  scale_y_continuous(labels = label_percent()) +
+  scale_x_continuous(
+    breaks = seq(1995, max(same_gender_trends$release_year, na.rm = TRUE), by = 5)
+  ) +
+  
+  theme_minimal() +
+  labs(
+    title = "Frequency of Same-Gender Love Interests in Movies (Bar Chart)",
+    x = "Release Year",
+    y = "Frequency of Same-Gender Couples"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold"),
+  )
+
+```
 
 # Challenge 1: Replicating a chart
 
@@ -298,5 +603,50 @@ Craigslist. Your final graph should look like below. You may find
 
 ```{r challenge1, echo=FALSE, out.width="90%"}
 knitr::include_graphics(here::here("images", "challenge1.png"), error = FALSE)
+```
+```{r fig.width=15, fig.height=6}
+top_12_cities <- rent %>%
+  count(city, sort = TRUE) %>%
+  slice_head(n = 12) %>%
+  pull(city) 
+
+sf_median_rent <- rent %>%
+  filter(beds %in% c(0, 1, 2)) %>%
+  filter(city %in% top_12_cities) %>%
+  group_by(year, city, beds) %>% 
+  summarise(
+    median_price = median(price, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  group_by(city, beds) %>%
+  arrange(year) %>%
+  mutate(
+    base_price = first(median_price),
+    pct_change = (median_price - base_price) / base_price * 100
+  ) %>%
+  ungroup()
+
+ggplot(sf_median_rent, aes(x = year, y = pct_change, 
+                           group = interaction(city, beds), 
+                           color = city
+                           )) +
+  geom_line(linewidth = 0.8, alpha = 0.7) +
+  scale_color_brewer(palette = "Set3") +
+  facet_grid(beds ~ city) +
+  theme_minimal() +
+  labs(
+    title = "Cumulative % Change in Median Rental Prices Over Time in Bay Area",
+    subtitle = "Faceted by City and Number of Bedrooms 2000-2018",
+    x = "Year",
+    y = "Cumulative % Change"
+    ) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    strip.text = element_text(size = 10, face = "bold"), 
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.border = element_rect(color = "gray30", fill = NA, linewidth = 1),
+    strip.background = element_rect(fill = "gray90", color = "gray30", linewidth = 1),
+    legend.position = "none" 
+  )
 ```
 Deliverable - a knitted HTML, displaying code and output.
